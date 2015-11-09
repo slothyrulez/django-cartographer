@@ -2,12 +2,72 @@
 """
 Asset manifest registry
 """
+
 import json
+import collections.UserDict
 
 from django.template.loader import get_template as loader_get_template
 
 from .errors import (NotRegisteredBundle, NotRegisteredAsset,
     AlreadyRegisteredBundle, AlreadyRegisteredAsset)
+
+
+class IBundle(collections.UserDict):
+    def __init__(self, **kw):
+        for k, v in kw.items():
+            setattr(self, k, v)
+        self.get_templates()
+        super(IBundle, self).__init__(**kw)
+
+    def get_templates(self):
+        " Initialize tempplates "
+        # TODO: Raise raise improperly configured
+        self.templates = {tag: loader_get_template(path)
+                          for tag, path in self.TAG_TEMPLATES.items()}
+
+    def to_registry(self):
+        # TODO: check is used ? is needed ?
+        return {self.name: self}
+
+    def filter_assets(self, kind=None):
+        """
+        Filter contents of the bundle by extension
+        """
+        # TODO: Use a proper/better check of the extension
+        kind = kind or [""]
+        extension = lambda name, ext: name.endswith(ext)
+        for ext in kind:
+            for name in self._assets:
+                if extension(name, ext):
+                    yield (name, self._assets[name])
+
+    def get_asset(self, asset):
+        """ """
+        # 
+        try:
+            return self.data[asset]
+        except KeyError:
+            raise NotRegisteredAsset(asset)
+
+    def has_asset(self, asset):
+        return asset in self._assets
+
+    def register_asset(self, asset, value):
+        if self.has_asset(asset):
+            raise AlreadyRegisteredAsset(asset)
+        self._assets[asset] = value
+
+    def unregister_asset(self, asset, value):
+        if not self.has_asset(asset):
+            raise NotRegisteredAsset(asset)
+        del self._assets[asset]
+
+    def update(self, assets):
+        self._assets.update(**assets)
+
+    def __str__(self):
+        import pprint
+        return pprint.pformat(self._assets)
 
 
 class Bundle(object):
