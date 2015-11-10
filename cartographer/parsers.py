@@ -60,7 +60,7 @@ class AssetsParserWebpackStats(AssetsParser):
 
     def deserialize(self):
         try:
-            with open(self.STATS_FILE, 'rb') as json_file:
+            with open(self.STATS_FILE, 'r', encoding="utf-8") as json_file:
                 return json.load(json_file)
         except IOError:
             raise IOError('Error reading {}. Are you sure webpack has \

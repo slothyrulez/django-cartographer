@@ -4,7 +4,7 @@ Asset manifest registry
 """
 
 import json
-import collections.UserDict
+import collections
 
 from django.template.loader import get_template as loader_get_template
 
@@ -43,7 +43,7 @@ class IBundle(collections.UserDict):
 
     def get_asset(self, asset):
         """ """
-        # 
+        #
         try:
             return self.data[asset]
         except KeyError:

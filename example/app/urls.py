@@ -18,15 +18,8 @@ from django.contrib import admin
 from django.views.generic import TemplateView
 
 
-# Load asset manifest in memory
-# import ipdb; ipdb.set_trace()
-#
-import assets_cartographer
-assets_cartographer.autodiscover()
-
 
 urlpatterns = [
     url(r'^$', TemplateView.as_view(template_name='init.html'), name='init'),
-    url(r'^', include("assets_cartographer.urls")),
     url(r'^admin/', include(admin.site.urls)),
 ]
