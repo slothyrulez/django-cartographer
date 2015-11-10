@@ -38,8 +38,6 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'app',
-    'webpack_loader',
-    'assets_cartographer',
     'cartographer',
 )
 
@@ -108,15 +106,6 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'assets'),
 )
 
-WEBPACK_LOADER = {
-    'DEFAULT': {
-        'BUNDLE_DIR_NAME': 'bundles/', # must end with slash
-        'STATS_FILE': 'webpack-stats.json',
-        'POLL_DELAY': 0.1,
-        'IGNORE': ['.+\.hot-update.js', '.+\.map']
-    }
-}
-
 # Cartographer config
 CARTOGRAPHER = {
     'FUU':{},
@@ -131,14 +120,4 @@ CARTOGRAPHER = {
         'POLL_INTERVAL': 0.1,
         'IGNORE': ['.+\.hot-update.js', '.+\.map']
     }
-}
-
- # For assets management
-ASSETS_PACKAGED = not(DEBUG)
-ASSETS_STRICT = False
-# ASSETS_MAP_FILEPATH = os.path.join("assets.json")
-ASSETS_MAP_FILEPATH = WEBPACK_LOADER["DEFAULT"]["STATS_FILE"]
-ASSETS_TAG_TEMPLATES = {
-    "javascripts": "assets/javascript_tag.html",
-    "stylesheets": "assets/stylesheet_tag.html",
 }
