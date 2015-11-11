@@ -38,6 +38,8 @@ class AssetsParser(object):
 
     def deserialize(self):
         """
+        Should return a dictionary with at least a name for the asset as
+        the key and a path of the asset
         """
         raise NotImplementedError()
 
@@ -46,6 +48,14 @@ class AssetsParser(object):
         Method adapting bundles/assets sources to registry
         """
         raise NotImplementedError()
+
+
+class AssetsParserFile(AssetsParser):
+    """
+    Assets parser from file
+    """
+    def __init__(self, *args, **kw):
+        raise NotImplementedError("TOBEDONE :)")
 
 
 class AssetsParserWebpackStats(AssetsParser):
@@ -59,6 +69,10 @@ class AssetsParserWebpackStats(AssetsParser):
             self.IGNORE = [re.compile(patt) for patt in self.IGNORE]
 
     def deserialize(self):
+        """
+        Webpack stats returns a json with a minimin structure
+        # TODO: document structure
+        """
         try:
             with open(self.STATS_FILE, 'r', encoding="utf-8") as json_file:
                 return json.load(json_file)
@@ -68,6 +82,9 @@ class AssetsParserWebpackStats(AssetsParser):
                 correct?'.format(self.STATS_FILE))
 
     def filter_files(self, chunk):
+        """
+        webpack default config IGNORE
+        """
         for _file in chunk:
             filename = _file["name"]
             ignore = any(regex.match(filename) for regex in self.IGNORE)
@@ -76,12 +93,15 @@ class AssetsParserWebpackStats(AssetsParser):
                 _file["url"] = staticfiles_storage.url(realpath)
                 yield _file
 
-    def filter_chunks(self, manifest):
+    def _iter_chunks(self, manifest):
         for chunk in manifest:
             if chunk == self.name:
                 yield chunk, manifest[chunk]
 
     def update(self):
+        """
+        Creates/Updates the registry from specified source
+        """
         json_manifest = self.deserialize()
         status = json_manifest.get('status')
 
@@ -93,7 +113,7 @@ class AssetsParserWebpackStats(AssetsParser):
 
         if status == 'done':
             chunks = json_manifest['chunks']
-            for chunk_name, chunk in self.filter_chunks(chunks):
+            for chunk_name, chunk in self._iter_chunks(chunks):
                 bundle = Bundle(name=chunk_name,
                                 IGNORE=self.IGNORE,
                                 POLL_INTERVAL=self.POLL_INTERVAL,
@@ -101,10 +121,13 @@ class AssetsParserWebpackStats(AssetsParser):
                                 ASSETS_STRICT=self.ASSETS_STRICT,
                                 STATS_FILE=self.STATS_FILE,
                                 TAG_TEMPLATES=self.TAG_TEMPLATES)
-                self.registry.register_bundle(chunk_name, bundle)
+
+                self.registry[chunk_name] = bundle
                 for _file in self.filter_files(chunk):
-                    self.registry.register_asset(chunk_name, _file["name"],
-                                                 _file)
+                    asset_name = _file["name"]
+                    asset_value = _file
+                    bundle[asset_name] = asset_value
+
             return
 
         elif status == 'error':

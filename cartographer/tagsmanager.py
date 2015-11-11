@@ -46,12 +46,12 @@ class AssetTagsManagerFromManifest(AssetTagsManagerBase):
         """
         Find and return asset file url given package name
         """
-        asset = bundle.get_asset(name)
+        asset = bundle[name]
         return asset.get("url", None)
 
     def render_bundle(self, bundle_name, kind=None):
         tags = []
-        bundle = self.manifest.get_bundle(bundle_name)
+        bundle = self.manifest[bundle_name]
         for asset_name, asset in bundle.filter_assets(kind):
             asset_url = self.get_file(bundle, asset_name)
             template = self.get_template(bundle, asset_url)
