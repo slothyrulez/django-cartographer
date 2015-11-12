@@ -23,6 +23,9 @@ Add "cartographer" to INSTALLED_APPS
 ...
 ```
 
+Configuration
+-------------
+
 ### Assets from webpack-bundle-tracker
 ### Assets from file
 
