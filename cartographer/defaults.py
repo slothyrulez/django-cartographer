@@ -9,6 +9,7 @@ DEFAULT_CONFIG = {
         "js": "cartographer/javascript_tag.html",
         "css": "cartographer/stylesheet_tag.html",
     },
+    'URL': None,
     'ASSETS_STRICT': False,
     'BUNDLE_DIRNAME': 'webpack_bundles/',
     'STATS_FILE': 'webpack-stats.json',

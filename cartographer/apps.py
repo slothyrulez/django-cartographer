@@ -27,6 +27,8 @@ class CartographerConfig(AppConfig):
         Use settings to generate the registry of assets
         """
         from django.conf import settings
+        if settings.DEBUG:
+            print("DISCOVERING ASSETS")
 
         user_config = getattr(settings, 'CARTOGRAPHER', {})
         for config_block in user_config:

@@ -89,8 +89,15 @@ class AssetsParserWebpackStats(AssetsParser):
             filename = _file["name"]
             ignore = any(regex.match(filename) for regex in self.IGNORE)
             if not ignore:
-                realpath = os.path.join(self.BUNDLE_DIRNAME, filename)
-                _file["url"] = staticfiles_storage.url(realpath)
+                if self.URL:
+                    try:
+                        _file["_url"] = getattr(_file, self.URL)
+                    except AttributeError as e:
+                        raise CartographerConfigError(
+                            "Invalid key '{}'".format(self.URL))
+                else:
+                    realpath = os.path.join(self.BUNDLE_DIRNAME, filename)
+                    _file["_url"] = staticfiles_storage.url(realpath)
                 yield _file
 
     def _iter_chunks(self, manifest):
@@ -115,6 +122,7 @@ class AssetsParserWebpackStats(AssetsParser):
             chunks = json_manifest['chunks']
             for chunk_name, chunk in self._iter_chunks(chunks):
                 bundle = Bundle(name=chunk_name,
+                                URL=getattr(self, "URL", None),
                                 IGNORE=self.IGNORE,
                                 POLL_INTERVAL=self.POLL_INTERVAL,
                                 BUNDLE_DIRNAME=self.BUNDLE_DIRNAME,

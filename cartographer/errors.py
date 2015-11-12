@@ -41,11 +41,12 @@ class NotRegistered(CartographerError):
     pass
 
 
+# TODO: List of registered
 class NotRegisteredBundle(NotRegistered):
     def __str__(self):
         return "BUNDLE {} not registered".format(repr(self.value))
 
-
+# TODO: List of registered
 class NotRegisteredAsset(NotRegistered):
     def __str__(self):
         return "ASSET {} not registered".format(repr(self.value))
