@@ -97,7 +97,12 @@ class AssetsParserWebpackStats(AssetsParser):
         """
         try:
             with open(self.SOURCE, 'r', encoding="utf-8") as json_file:
-                return json.load(json_file)
+                try:
+                    return json.load(json_file)
+                except ValueError:
+                    # The file can be unreadable here
+                    # due to reloading, json will throw errors
+                    return None
         except IOError:
             raise IOError('Error reading {}. Are you sure webpack has \
                 generated the file and the path is \
@@ -125,14 +130,18 @@ class AssetsParserWebpackStats(AssetsParser):
         Creates/Updates the registry from specified source
         """
         json_manifest = self.get_source()
-        status = json_manifest.get('status')
+        try:
+            status = json_manifest.get('status', None)
+        except AttributeError:
+            status = None
 
         # Since webpack origin is updatable and now supoprt
         # inotify just will wait to receive the file update
-        if status == "compiling":
+        if status is None or status == "compiling":
             return
 
         # TODO: support timeouts
+        #
         # while status == 'compiling':
         #     time.sleep(self.poll_delay)
         #     json_manifest = self.get_source()

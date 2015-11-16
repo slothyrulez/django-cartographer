@@ -28,9 +28,10 @@ def updatable_sources_watcher():
     # Watch manager
     wm = pyinotify.WatchManager()
     # mask = pyinotify.ALL_EVENTS
+    # TODO: Explore better mask options
     mask = (
-        pyinotify.IN_MODIFY |
-        pyinotify.IN_DELETE
+        pyinotify.IN_MODIFY
+        # pyinotify.IN_DELETE
     )
     notifier = pyinotify.ThreadedNotifier(wm, EventHandler())
     # Start the notifier from a new thread,
