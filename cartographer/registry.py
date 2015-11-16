@@ -8,6 +8,7 @@ import collections
 
 from django.template.loader import get_template as loader_get_template
 
+from .defaults import UPDATABLE_BUNDLES
 from .errors import (NotRegisteredBundle, NotRegisteredAsset,
                      AlreadyRegisteredBundle, AlreadyRegisteredAsset)
 
@@ -24,11 +25,14 @@ class Bundle(collections.UserDict):
         """
         for k, v in kw.items():
             self.__setattr__(k, v)
+        self.updatable = self.ORIGIN in UPDATABLE_BUNDLES
         self.get_templates()
         super(Bundle, self).__init__()
 
     def get_templates(self):
-        " Initialize tempplates "
+        """
+        Initialize templates
+        """
         # TODO: Raise raise improperly configured
         self.templates = {tag: loader_get_template(path)
                           for tag, path in self.TAG_TEMPLATES.items()}
@@ -57,7 +61,8 @@ class Bundle(collections.UserDict):
 
     def __setitem__(self, asset, value):
         # Non standard behaviour, asset is being override
-        if asset in self:
+
+        if not self.updatable and asset in self:
             raise AlreadyRegisteredAsset(asset)
         super(Bundle, self).__setitem__(asset, value)
 
@@ -71,8 +76,26 @@ class AssetManifestRegistry(collections.UserDict):
     """
     Manifest registry interface to store manifest entries
     """
+    def __init__(self, *args, **kw):
+        """
+        Hold a registry of incoming
+        """
+        super(AssetManifestRegistry, self).__init__(*args, **kw)
+
     def get_registry(self):
         return self
+
+    def filter_updatable(self):
+        """
+        Updatable bundles are those whose assets can change
+        """
+        for bundle_name, bundle in self.items():
+            if bundle.ORIGIN in UPDATABLE_BUNDLES:
+                yield (bundle_name, bundle)
+
+    def get_updatable_sources(self):
+        return (getattr(bundle, "SOURCE", None)
+                for bundle_name, bundle in self.filter_updatable())
 
     def __getitem__(self, bundle):
         """ Returns bundle """
@@ -83,7 +106,7 @@ class AssetManifestRegistry(collections.UserDict):
 
     def __setitem__(self, bundle, value):
         # Non standard behaviour, asset is being overriden
-        if bundle in self:
+        if bundle in self and not self[bundle].updatable:
             raise AlreadyRegisteredBundle(bundle)
         super(AssetManifestRegistry, self).__setitem__(bundle, value)
 

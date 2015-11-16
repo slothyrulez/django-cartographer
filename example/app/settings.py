@@ -108,16 +108,16 @@ STATICFILES_DIRS = (
 
 # Cartographer config
 CARTOGRAPHER = {
-    'FUU':{},
-    'main': {
-        'TAG_TEMPLATES': {
-            "js": "cartographer/javascript_tag.html",
-            "css": "cartographer/stylesheet_tag.html",
-        },
-        'ASSETS_STRICT': False,
-        'BUNDLE_DIRNAME': 'bundles/', # must end with slash
-        'STATS_FILE': 'webpack-stats.json',
-        'POLL_INTERVAL': 0.1,
-        'IGNORE': ['.+\.hot-update.js', '.+\.map']
+    "WEBPACK": {
+        'FUU': {},
+        'main': {
+            'TAG_TEMPLATES': {
+                "js": "cartographer/javascript_tag.html",
+                "css": "cartographer/stylesheet_tag.html",
+            },
+            'BUNDLES_DIRNAME': 'bundles/',  # must end with slash
+            'STATS_FILE': 'webpack-stats.json',
+            'IGNORE': ['.+\.hot-update.js', '.+\.map']
+        }
     }
 }

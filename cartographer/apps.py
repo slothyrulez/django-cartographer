@@ -3,7 +3,8 @@
 from django.apps import AppConfig
 
 from .errors import BAD_CONFIG_ERROR
-from .parsers import AssetsParserWebpackStats
+from .parsers import autodiscover
+from .utils import updatable_sources_watcher
 
 
 def cartographer_cfg_check(app_configs, **kwargs):
@@ -26,13 +27,10 @@ class CartographerConfig(AppConfig):
         """
         Use settings to generate the registry of assets
         """
-        from django.conf import settings
-
-        user_config = getattr(settings, 'CARTOGRAPHER', {})
-        for config_block in user_config:
-            AssetsParserWebpackStats(config_block).parse()
+        return autodiscover()
 
     def ready(self):
         from django.core.checks import register, Tags
         register(Tags.compatibility)(cartographer_cfg_check)
-        self.autodiscover()
+        updatable_sources = self.autodiscover()
+        updatable_sources_watcher()
